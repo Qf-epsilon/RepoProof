@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RepoProof · 公开仓库核验</title>
+    <meta
+      name="description"
+      content="输入公开 GitHub 仓库地址，逐条核对项目描述与仓库中的文件、依赖清单和许可证元数据是否一致。"
+    />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="color-scheme" content="light" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%231f2328'/%3E%3Cpath d='M20 46V18h12.5c6 0 10.5 3.6 10.5 9.2 0 4-2.3 6.9-6 8.2L44 46h-7l-5.7-9.5H26V46h-6zm6-15h6.2c3 0 4.9-1.5 4.9-3.9 0-2.4-1.9-3.9-4.9-3.9H26V31z' fill='%23ffffff'/%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://api.github.com" />
+    <link rel="preconnect" href="https://raw.githubusercontent.com" />
+    <link rel="stylesheet" href="/public/styles.css" />
+    <link rel="stylesheet" href="/public/theme.css" />
+  </head>
+  <body>
+    <div id="example-banner" class="example-banner" hidden>
+      <span id="example-banner-text"></span>
+      <button id="exit-example" type="button" class="text-button">退出示例</button>
+    </div>
+
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="/">
+          <span class="brand-mark" aria-hidden="true">R</span>
+          RepoProof
+          <span class="brand-desc">公开仓库核验</span>
+        </a>
+        <nav class="header-nav" aria-label="页面内导航">
+          <a href="#how">核验流程</a>
+          <a href="#states">判定状态</a>
+          <a href="#limits">适用范围</a>
+        </nav>
+        <div class="header-actions">
+          <button id="example-header" type="button" class="text-button">使用示例数据</button>
+          <button id="reset-button" type="button" class="secondary-button" hidden>
+            重新查询
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section id="view-home" class="view">
+        <div class="layout single">
+          <div class="content">
+            <header class="hero">
+              <p class="eyebrow">证据固定到具体提交</p>
+              <h1 class="page-title hero-title">
+                把简历里的项目描述，变成可点开的公开证据
+              </h1>
+              <p class="lead">
+                输入公开 GitHub 仓库，逐条核对文件、依赖清单和许可证元数据。每条结论都附固定提交的链接，并写明它支持什么、不支持什么。
+              </p>
+
+              <form id="repo-form" class="entry-panel" autocomplete="off">
+                <label class="field-label" for="repo-url">GitHub 仓库地址</label>
+                <div class="input-row">
+                  <input
+                    id="repo-url"
+                    name="repo"
+                    type="text"
+                    inputmode="url"
+                    placeholder="https://github.com/owner/repo"
+                    spellcheck="false"
+                  />
+                  <button id="load-button" type="submit" class="primary-button">
+                    <span>开始核验</span>
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                      <path d="M5 12h14M13 6l6 6-6 6" />
+                    </svg>
+                  </button>
+                </div>
+                <div class="entry-note">
+                  <button id="example-button" type="button" class="text-button">
+                    使用示例数据
+                  </button>
+                  <span class="fineprint">无需登录，不上传文件。</span>
+                </div>
+                <p id="home-error" class="error-text" role="alert" hidden></p>
+              </form>
+
+              <div class="state-block" id="states">
+                <div class="state-block-head">
+                  <h2>判定状态</h2>
+                  <span>四态分开，失败原因可解释。</span>
+                </div>
+                <ul class="state-legend compact" data-state-legend></ul>
+              </div>
+            </header>
+
+            <section class="section" id="how">
+              <div class="section-head">
+                <h2>核验流程</h2>
+                <p>三步，核验对象都由你确认。</p>
+              </div>
+              <ol class="flow">
+                <li>
+                  <span class="flow-num" aria-hidden="true">01</span>
+                  <div>
+                    <strong>读取仓库</strong>
+                    <p>读取默认分支，并把证据固定到当前提交。</p>
+                  </div>
+                </li>
+                <li>
+                  <span class="flow-num" aria-hidden="true">02</span>
+                  <div>
+                    <strong>确认对象</strong>
+                    <p>从描述提取或手动添加，确认后才执行。</p>
+                  </div>
+                </li>
+                <li>
+                  <span class="flow-num" aria-hidden="true">03</span>
+                  <div>
+                    <strong>逐条核验</strong>
+                    <p>给出状态、证据链接和支持边界。</p>
+                  </div>
+                </li>
+              </ol>
+            </section>
+
+            <section class="section" id="limits">
+              <div class="section-head">
+                <h2>适用范围</h2>
+                <p>只核对可机械核实的声明。</p>
+              </div>
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>声明</th>
+                      <th>核验依据</th>
+                      <th>边界</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>使用了某框架或库</td>
+                      <td>依赖清单里的声明</td>
+                      <td>不能证明实际调用</td>
+                    </tr>
+                    <tr>
+                      <td>包含测试、CI、Docker 或文档</td>
+                      <td>对应路径能否访问</td>
+                      <td>不能证明质量或覆盖率</td>
+                    </tr>
+                    <tr>
+                      <td>采用某许可证</td>
+                      <td>GitHub 识别的 SPDX</td>
+                      <td>不能判断许可证是否适用</td>
+                    </tr>
+                    <tr>
+                      <td>性能、用户量、个人贡献</td>
+                      <td>没有公开可复现材料</td>
+                      <td>不在核验范围</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <footer class="home-foot">
+              <p>
+                <strong>数据来源</strong>
+                GitHub REST API、依赖清单原文、SPDX 元数据。
+              </p>
+              <p>
+                只读取公开仓库，不保存输入。公开证据不足，不代表项目没有实现，也不判断个人贡献。
+              </p>
+            </footer>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-repo" class="view" hidden>
+        <div class="layout">
+          <div class="content">
+            <div id="repo-loading" class="loading" hidden aria-busy="true" aria-live="polite">
+              <div class="loading-head">
+                <span class="loading-pulse" aria-hidden="true"></span>
+                <span id="repo-loading-text">正在读取仓库信息…</span>
+              </div>
+              <div class="skeleton-overview" aria-hidden="true">
+                <div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div>
+                <div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div>
+              </div>
+              <div class="skeleton-cards" aria-hidden="true">
+                <div class="sk-card"></div><div class="sk-card"></div>
+                <div class="sk-card"></div><div class="sk-card"></div>
+              </div>
+            </div>
+
+            <div id="repo-content" hidden>
+              <div class="repo-head">
+                <p class="eyebrow">仓库</p>
+                <h1 id="repo-title" class="repo-title">仓库</h1>
+              </div>
+
+              <dl id="repo-overview" class="overview"></dl>
+              <div id="notices" class="notices" hidden></div>
+
+              <section class="section">
+                <div class="section-head">
+                  <h2>仓库内容</h2>
+                  <p>只说明是否存在，不评价内容。</p>
+                </div>
+                <div id="inventory"></div>
+              </section>
+
+              <section class="section">
+                <div class="section-head">
+                  <h2>核验对象</h2>
+                  <p>确认后才会发出请求。</p>
+                </div>
+
+                <div class="claim-input">
+                  <label class="field-label" for="claim-text">从描述中提取</label>
+                  <textarea
+                    id="claim-text"
+                    rows="3"
+                    placeholder="粘贴项目描述，例如：使用 FastAPI，包含 pytest，采用 MIT。"
+                  ></textarea>
+                  <div class="form-row">
+                    <button id="suggest-button" type="button" class="secondary-button">
+                      提取建议
+                    </button>
+                    <span class="fineprint">按字面关键词匹配，结果需要你确认。</span>
+                  </div>
+                </div>
+
+                <div class="claim-add">
+                  <label class="field-label" for="template-select">手动添加</label>
+                  <div class="input-row">
+                    <select id="template-select"></select>
+                    <input
+                      id="object-input"
+                      type="text"
+                      spellcheck="false"
+                      placeholder="核验对象"
+                      list="spdx-options"
+                    />
+                    <button id="add-claim-button" type="button" class="secondary-button">
+                      添加
+                    </button>
+                  </div>
+                  <datalist id="spdx-options"></datalist>
+                </div>
+
+                <p id="claim-empty" class="empty-hint">
+                  还没有核验对象。
+                </p>
+                <ul id="claim-list" class="claim-list"></ul>
+              </section>
+            </div>
+          </div>
+
+          <aside class="side">
+            <section class="side-block">
+              <h2>本次核验</h2>
+              <div id="scope" class="scope" hidden></div>
+              <p id="scope-empty" class="side-empty">尚未添加核验对象。</p>
+              <button id="verify-button" type="button" class="primary-button block" disabled>
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                  <path d="M5 12.5l4.5 4.5L19 7.5" />
+                </svg>
+                <span>确认并核验</span>
+              </button>
+              <p id="verify-status" class="fineprint"></p>
+              <p id="verify-error" class="error-text" role="alert" hidden></p>
+              <p class="side-note side-footnote">
+                只读公开仓库 · 证据固定到提交 · 限流记为无法核验。
+              </p>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <section id="view-results" class="view" hidden>
+        <div class="layout single">
+          <div class="content report">
+            <header class="report-head">
+              <p class="eyebrow">报告</p>
+              <h1 class="page-title">核验结果</h1>
+              <p id="results-meta" class="results-meta"></p>
+              <div id="results-stats" class="stats"></div>
+              <p id="results-summary" class="sr-only" role="status" aria-live="polite"></p>
+              <div class="results-tools">
+                <button id="copy-sheet" type="button" class="primary-button">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <rect x="8" y="8" width="14" height="14" rx="2.5" />
+                    <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                  </svg>
+                  <span id="copy-sheet-label">复制证据单</span>
+                </button>
+                <button id="download-sheet" type="button" class="secondary-button">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 20h16" />
+                  </svg>
+                  <span>下载 .md</span>
+                </button>
+                <button id="reverify-button" type="button" class="text-button" hidden>
+                  重新核验
+                </button>
+                <button id="results-example" type="button" class="text-button" hidden>
+                  先看示例数据
+                </button>
+                <span id="sheet-status" class="fineprint" role="status" aria-live="polite"></span>
+              </div>
+            </header>
+
+            <details class="state-key">
+              <summary>状态说明</summary>
+              <ul class="state-legend compact" data-state-legend></ul>
+            </details>
+
+            <details class="capability" id="results-context" hidden>
+              <summary>仓库信息与内容扫描</summary>
+              <div id="results-context-body" class="context-body"></div>
+            </details>
+            <div id="results-notices" class="notices" hidden></div>
+            <p id="results-error" class="error-text" role="alert" hidden></p>
+            <div id="results-list" class="results-list"></div>
+            <div class="form-row results-actions">
+              <button id="back-button" type="button" class="secondary-button">
+                返回修改
+              </button>
+              <button id="results-reset" type="button" class="text-button">
+                查询其他仓库
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <p id="boundary-text"></p>
+        <p class="footer-meta">不保存输入，不读取私有仓库。</p>
+      </div>
+    </footer>
+
+    <script type="module" src="/public/app.js"></script>
+  </body>
+</html>
