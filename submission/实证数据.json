@@ -1,0 +1,696 @@
+{
+  "sampledAt": "2026-11-27T12:05:45.636Z",
+  "totals": {
+    "inconsistent": 0,
+    "insufficient": 7,
+    "unable": 0,
+    "found": 33
+  },
+  "byRule": {
+    "R1": {
+      "total": 28,
+      "inconsistent": 0,
+      "insufficient": 6,
+      "unable": 0,
+      "found": 22
+    },
+    "R3": {
+      "total": 8,
+      "inconsistent": 0,
+      "insufficient": 1,
+      "unable": 0,
+      "found": 7
+    },
+    "R2": {
+      "total": 4,
+      "inconsistent": 0,
+      "insufficient": 0,
+      "unable": 0,
+      "found": 4
+    }
+  },
+  "repos": [
+    {
+      "slug": "xunyun-jingchuan",
+      "repo": "bufan528/xunyun-jingchuan",
+      "htmlUrl": "https://github.com/bufan528/xunyun-jingchuan",
+      "commit": "d31d01a4da79087f2bdd50a6b09ecbbbc4b23b7a",
+      "snapshotDate": "2026-11-27",
+      "label": "个人小程序：xunyun-jingchuan",
+      "claims": [
+        {
+          "id": "c1",
+          "text": "项目有完整文档",
+          "template": "docs",
+          "rule": "R1",
+          "object": "README.md",
+          "state": "found",
+          "explanation": "该文件可通过 GitHub 公开接口访问。",
+          "alternatives": []
+        },
+        {
+          "id": "c2",
+          "text": "入口文件为 miniprogram/app.js",
+          "template": "entry",
+          "rule": "R1",
+          "object": "miniprogram/app.js",
+          "state": "found",
+          "explanation": "该文件可通过 GitHub 公开接口访问。",
+          "alternatives": []
+        },
+        {
+          "id": "c3",
+          "text": "项目包含自动化测试",
+          "template": "tests",
+          "rule": "R1",
+          "object": "tests/",
+          "state": "insufficient",
+          "explanation": "在指定路径未找到可访问证据。这不代表文件不存在，也不代表功能没有实现。",
+          "alternatives": []
+        },
+        {
+          "id": "c4",
+          "text": "项目配置了 CI 流水线",
+          "template": "ci",
+          "rule": "R1",
+          "object": ".github/workflows/",
+          "state": "insufficient",
+          "explanation": "在指定路径未找到可访问证据。这不代表文件不存在，也不代表功能没有实现。",
+          "alternatives": []
+        },
+        {
+          "id": "c5",
+          "text": "项目采用 MIT 许可证",
+          "template": "license",
+          "rule": "R3",
+          "object": "MIT",
+          "state": "insufficient",
+          "explanation": "GitHub 未识别出可用的 SPDX 许可证元数据。这不等于项目没有许可证。",
+          "alternatives": []
+        }
+      ],
+      "summary": {
+        "found": 2,
+        "insufficient": 3,
+        "inconsistent": 0,
+        "unable": 0
+      }
+    },
+    {
+      "slug": "express",
+      "repo": "expressjs/express",
+      "htmlUrl": "https://github.com/expressjs/express",
+      "commit": "43fca52d28a422c8be48fd489cbd4f2d6152bab6",
+      "snapshotDate": "2026-11-27",
+      "label": "Node.js 框架：expressjs/express",
+      "claims": [
+        {
+          "id": "c1",
+          "text": "项目包含自动化测试",
+          "template": "tests",
+          "rule": "R1",
+          "object": "tests/",
+          "state": "insufficient",
+          "explanation": "在指定路径未找到可访问证据。这不代表文件不存在，也不代表功能没有实现。",
+          "alternatives": [
+            {
+              "path": "test/",
+              "files": 114
+            }
+          ]
+        },
+        {
+          "id": "c2",
+          "text": "项目配置了 CI 流水线",
+          "template": "ci",
+          "rule": "R1",
+          "object": ".github/workflows/",
+          "state": "found",
+          "explanation": "该目录可通过 GitHub 公开接口访问。",
+          "alternatives": []
+        },
+        {
+          "id": "c3",
+          "text": "项目采用 MIT 许可证",
+          "template": "license",
+          "rule": "R3",
+          "object": "MIT",
+          "state": "found",
+          "explanation": "声明为 MIT，GitHub 识别的许可证也是 MIT。",
+          "alternatives": []
+        },
+        {
+          "id": "c4",
+          "text": "项目有 Readme 文档",
+          "template": "docs",
+          "rule": "R1",
+          "object": "Readme.md",
+          "state": "found",
+          "explanation": "该文件可通过 GitHub 公开接口访问。",
+          "alternatives": []
+        },
+        {
+          "id": "c5",
+          "text": "使用 supertest 做接口测试",
+          "template": "framework",
+          "rule": "R2",
+          "object": "supertest",
+          "state": "found",
+          "explanation": "在 package.json 的 开发依赖 中发现 supertest（^6.3.0）。",
+          "alternatives": []
+        }
+      ],
+      "summary": {
+        "found": 4,
+        "insufficient": 1,
+        "inconsistent": 0,
+        "unable": 0
+      }
+    },
+    {
+      "slug": "chalk",
+      "repo": "chalk/chalk",
+      "htmlUrl": "https://github.com/chalk/chalk",
+      "commit": "72110019e147683f60e13fa0ff5c14a0c27cd9fe",
+      "snapshotDate": "2026-11-27",
+      "label": "命令行配色库：chalk/chalk",
+      "claims": [
+        {
+          "id": "c1",
+          "text": "项目包含自动化测试",
+          "template": "tests",
+          "rule": "R1",
+          "object": "tests/",
+          "state": "insufficient",
+          "explanation": "在指定路径未找到可访问证据。这不代表文件不存在，也不代表功能没有实现。",
+          "alternatives": [
+            {
+              "path": "test/",
+              "files": 8
+            }
+          ]
+        },
+        {
+          "id": "c2",
+          "text": "项目配置了 CI 流水线",
+          "template": "ci",
+          "rule": "R1",
+          "object": ".github/workflows/",
+          "state": "found",
+          "explanation": "该目录可通过 GitHub 公开接口访问。",
+          "alternatives": []
+        },
+        {
+          "id": "c3",
+          "text": "项目采用 MIT 许可证",
+          "template": "license",
+          "rule": "R3",
+          "object": "MIT",
+          "state": "found",
+          "explanation": "声明为 MIT，GitHub 识别的许可证也是 MIT。",
+          "alternatives": []
+        },
+        {
+          "id": "c4",
+          "text": "项目有 readme 文档",
+          "template": "docs",
+          "rule": "R1",
+          "object": "readme.md",
+          "state": "found",
+          "explanation": "该文件可通过 GitHub 公开接口访问。",
+          "alternatives": []
+        },
+        {
+          "id": "c5",
+          "text": "入口文件为 source/index.js",
+          "template": "entry",
+          "rule": "R1",
+          "object": "source/index.js",
+          "state": "found",
+          "explanation": "该文件可通过 GitHub 公开接口访问。",
+          "alternatives": []
+        }
+      ],
+      "summary": {
+        "found": 4,
+        "insufficient": 1,
+        "inconsistent": 0,
+        "unable": 0
+      }
+    },
+    {
+      "slug": "fastapi-template",
+      "repo": "fastapi/full-stack-fastapi-template",
+      "htmlUrl": "https://github.com/fastapi/full-stack-fastapi-template",
+      "commit": "77e550a73bb49dd2967622c5ed11bf7a49603c93",
+      "snapshotDate": "2026-11-25",
+      "label": "FastAPI 全栈模板",
+      "claims": [
+        {
+          "id": "c1",
+          "text": "项目使用 FastAPI 构建后端",
+          "template": "framework",
+          "rule": "R2",
+          "object": "fastapi",
+          "state": "found",
+          "explanation": "在 backend/pyproject.toml 的 project.dependencies 中发现 fastapi（>=0.141.1,<1.0.0）。 另有 3 个清单未能读取，未纳入本次判断。",
+          "alternatives": []
+        },
+        {
+          "id": "c2",
+          "text": "项目包含自动化测试",
+          "template": "tests",
+          "rule": "R1",
+          "object": "tests/",
+          "state": "insufficient",
+          "explanation": "在指定路径未找到可访问证据。这不代表文件不存在，也不代表功能没有实现。",
+          "alternatives": [
+            {
+              "path": "backend/tests/",
+              "files": 15
+            },
+            {
+              "path": "frontend/tests/",
+              "files": 12
+            }
+          ]
+        },
+        {
+          "id": "c3",
+          "text": "项目配置了 CI 流水线",
+          "template": "ci",
+          "rule": "R1",
+          "object": ".github/workflows/",
+          "state": "found",
+          "explanation": "该目录可通过 GitHub 公开接口访问。",
+          "alternatives": []
+        },
+        {
+          "id": "c4",
+          "text": "项目采用 MIT 许可证",
+          "template": "license",
+          "rule": "R3",
+          "object": "MIT",
+          "state": "found",
+          "explanation": "声明为 MIT，GitHub 识别的许可证也是 MIT。",
+          "alternatives": []
+        },
+        {
+          "id": "c5",
+          "text": "项目有完整文档",
+          "template": "docs",
+          "rule": "R1",
+          "object": "README.md",
+          "state": "found",
+          "explanation": "该文件可通过 GitHub 公开接口访问。",
+          "alternatives": []
+        }
+      ],
+      "summary": {
+        "found": 4,
+        "insufficient": 1,
+        "inconsistent": 0,
+        "unable": 0
+      }
+    },
+    {
+      "slug": "requests",
+      "repo": "psf/requests",
+      "htmlUrl": "https://github.com/psf/requests",
+      "commit": "3c7baaa05ab4aa49cc819ce3a819d260de19c157",
+      "snapshotDate": "2026-11-27",
+      "label": "HTTP 库：psf/requests",
+      "claims": [
+        {
+          "id": "c1",
+          "text": "项目包含自动化测试",
+          "template": "tests",
+          "rule": "R1",
+          "object": "tests/",
+          "state": "found",
+          "explanation": "该目录可通过 GitHub 公开接口访问。",
+          "alternatives": []
+        },
+        {
+          "id": "c2",
+          "text": "项目配置了 CI 流水线",
+          "template": "ci",
+          "rule": "R1",
+          "object": ".github/workflows/",
+          "state": "found",
+          "explanation": "该目录可通过 GitHub 公开接口访问。",
+          "alternatives": []
+        },
+        {
+          "id": "c3",
+          "text": "项目采用 Apache-2.0 许可证",
+          "template": "license",
+          "rule": "R3",
+          "object": "Apache-2.0",
+          "state": "found",
+          "explanation": "声明为 Apache-2.0，GitHub 识别的许可证也是 Apache-2.0。",
+          "alternatives": []
+        },
+        {
+          "id": "c4",
+          "text": "项目有完整文档",
+          "template": "docs",
+          "rule": "R1",
+          "object": "README.md",
+          "state": "found",
+          "explanation": "该文件可通过 GitHub 公开接口访问。",
+          "alternatives": []
+        },
+        {
+          "id": "c5",
+          "text": "项目有 docs 目录",
+          "template": "docs",
+          "rule": "R1",
+          "object": "docs/",
+          "state": "found",
+          "explanation": "该目录可通过 GitHub 公开接口访问。",
+          "alternatives": []
+        }
+      ],
+      "summary": {
+        "found": 5,
+        "insufficient": 0,
+        "inconsistent": 0,
+        "unable": 0
+      }
+    },
+    {
+      "slug": "click",
+      "repo": "pallets/click",
+      "htmlUrl": "https://github.com/pallets/click",
+      "commit": "08b803cf32ceb2ae6a772c62d5da42757a897d44",
+      "snapshotDate": "2026-11-27",
+      "label": "命令行框架：pallets/click",
+      "claims": [
+        {
+          "id": "c1",
+          "text": "项目包含自动化测试",
+          "template": "tests",
+          "rule": "R1",
+          "object": "tests/",
+          "state": "found",
+          "explanation": "该目录可通过 GitHub 公开接口访问。",
+          "alternatives": []
+        },
+        {
+          "id": "c2",
+          "text": "项目配置了 CI 流水线",
+          "template": "ci",
+          "rule": "R1",
+          "object": ".github/workflows/",
+          "state": "found",
+          "explanation": "该目录可通过 GitHub 公开接口访问。",
+          "alternatives": []
+        },
+        {
+          "id": "c3",
+          "text": "项目采用 BSD-3-Clause 许可证",
+          "template": "license",
+          "rule": "R3",
+          "object": "BSD-3-Clause",
+          "state": "found",
+          "explanation": "声明为 BSD-3-Clause，GitHub 识别的许可证也是 BSD-3-Clause。",
+          "alternatives": []
+        },
+        {
+          "id": "c4",
+          "text": "项目有 Readme 文档",
+          "template": "docs",
+          "rule": "R1",
+          "object": "README.md",
+          "state": "found",
+          "explanation": "该文件可通过 GitHub 公开接口访问。",
+          "alternatives": []
+        },
+        {
+          "id": "c5",
+          "text": "入口文件为 src/click/core.py",
+          "template": "entry",
+          "rule": "R1",
+          "object": "src/click/core.py",
+          "state": "found",
+          "explanation": "该文件可通过 GitHub 公开接口访问。",
+          "alternatives": []
+        }
+      ],
+      "summary": {
+        "found": 5,
+        "insufficient": 0,
+        "inconsistent": 0,
+        "unable": 0
+      }
+    },
+    {
+      "slug": "typer",
+      "repo": "tiangolo/typer",
+      "htmlUrl": "https://github.com/fastapi/typer",
+      "commit": "6d6383fca42f7f451cc04c49b7bf828e18245a53",
+      "snapshotDate": "2026-11-27",
+      "label": "命令行工具：tiangolo/typer",
+      "claims": [
+        {
+          "id": "c1",
+          "text": "项目包含自动化测试",
+          "template": "tests",
+          "rule": "R1",
+          "object": "tests/",
+          "state": "found",
+          "explanation": "该目录可通过 GitHub 公开接口访问。",
+          "alternatives": []
+        },
+        {
+          "id": "c2",
+          "text": "项目配置了 CI 流水线",
+          "template": "ci",
+          "rule": "R1",
+          "object": ".github/workflows/",
+          "state": "found",
+          "explanation": "该目录可通过 GitHub 公开接口访问。",
+          "alternatives": []
+        },
+        {
+          "id": "c3",
+          "text": "项目采用 MIT 许可证",
+          "template": "license",
+          "rule": "R3",
+          "object": "MIT",
+          "state": "found",
+          "explanation": "声明为 MIT，GitHub 识别的许可证也是 MIT。",
+          "alternatives": []
+        },
+        {
+          "id": "c4",
+          "text": "项目有 Readme 文档",
+          "template": "docs",
+          "rule": "R1",
+          "object": "README.md",
+          "state": "found",
+          "explanation": "该文件可通过 GitHub 公开接口访问。",
+          "alternatives": []
+        },
+        {
+          "id": "c5",
+          "text": "使用 rich 渲染终端输出",
+          "template": "framework",
+          "rule": "R2",
+          "object": "rich",
+          "state": "found",
+          "explanation": "在 pyproject.toml 的 project.dependencies 中发现 rich（>=13.8.0）。",
+          "alternatives": []
+        }
+      ],
+      "summary": {
+        "found": 5,
+        "insufficient": 0,
+        "inconsistent": 0,
+        "unable": 0
+      }
+    },
+    {
+      "slug": "got",
+      "repo": "sindresorhus/got",
+      "htmlUrl": "https://github.com/sindresorhus/got",
+      "commit": "c196ad006b5c5c21717bafb93a384e68d2f33998",
+      "snapshotDate": "2026-11-27",
+      "label": "HTTP 客户端：sindresorhus/got",
+      "claims": [
+        {
+          "id": "c1",
+          "text": "项目包含自动化测试",
+          "template": "tests",
+          "rule": "R1",
+          "object": "tests/",
+          "state": "insufficient",
+          "explanation": "在指定路径未找到可访问证据。这不代表文件不存在，也不代表功能没有实现。",
+          "alternatives": [
+            {
+              "path": "test/",
+              "files": 153
+            }
+          ]
+        },
+        {
+          "id": "c2",
+          "text": "项目配置了 CI 流水线",
+          "template": "ci",
+          "rule": "R1",
+          "object": ".github/workflows/",
+          "state": "found",
+          "explanation": "该目录可通过 GitHub 公开接口访问。",
+          "alternatives": []
+        },
+        {
+          "id": "c3",
+          "text": "项目采用 MIT 许可证",
+          "template": "license",
+          "rule": "R3",
+          "object": "MIT",
+          "state": "found",
+          "explanation": "声明为 MIT，GitHub 识别的许可证也是 MIT。",
+          "alternatives": []
+        },
+        {
+          "id": "c4",
+          "text": "项目有 Readme 文档",
+          "template": "docs",
+          "rule": "R1",
+          "object": "readme.md",
+          "state": "found",
+          "explanation": "该文件可通过 GitHub 公开接口访问。",
+          "alternatives": []
+        },
+        {
+          "id": "c5",
+          "text": "使用 cacheable-request 处理缓存",
+          "template": "framework",
+          "rule": "R2",
+          "object": "cacheable-request",
+          "state": "found",
+          "explanation": "在 package.json 的 生产依赖 中发现 cacheable-request（^13.0.19）。",
+          "alternatives": []
+        }
+      ],
+      "summary": {
+        "found": 4,
+        "insufficient": 1,
+        "inconsistent": 0,
+        "unable": 0
+      }
+    }
+  ],
+  "insufficient": [
+    {
+      "id": "c3",
+      "text": "项目包含自动化测试",
+      "template": "tests",
+      "rule": "R1",
+      "object": "tests/",
+      "state": "insufficient",
+      "explanation": "在指定路径未找到可访问证据。这不代表文件不存在，也不代表功能没有实现。",
+      "alternatives": [],
+      "repo": "bufan528/xunyun-jingchuan",
+      "commit": "d31d01a4da79087f2bdd50a6b09ecbbbc4b23b7a"
+    },
+    {
+      "id": "c4",
+      "text": "项目配置了 CI 流水线",
+      "template": "ci",
+      "rule": "R1",
+      "object": ".github/workflows/",
+      "state": "insufficient",
+      "explanation": "在指定路径未找到可访问证据。这不代表文件不存在，也不代表功能没有实现。",
+      "alternatives": [],
+      "repo": "bufan528/xunyun-jingchuan",
+      "commit": "d31d01a4da79087f2bdd50a6b09ecbbbc4b23b7a"
+    },
+    {
+      "id": "c5",
+      "text": "项目采用 MIT 许可证",
+      "template": "license",
+      "rule": "R3",
+      "object": "MIT",
+      "state": "insufficient",
+      "explanation": "GitHub 未识别出可用的 SPDX 许可证元数据。这不等于项目没有许可证。",
+      "alternatives": [],
+      "repo": "bufan528/xunyun-jingchuan",
+      "commit": "d31d01a4da79087f2bdd50a6b09ecbbbc4b23b7a"
+    },
+    {
+      "id": "c1",
+      "text": "项目包含自动化测试",
+      "template": "tests",
+      "rule": "R1",
+      "object": "tests/",
+      "state": "insufficient",
+      "explanation": "在指定路径未找到可访问证据。这不代表文件不存在，也不代表功能没有实现。",
+      "alternatives": [
+        {
+          "path": "test/",
+          "files": 114
+        }
+      ],
+      "repo": "expressjs/express",
+      "commit": "43fca52d28a422c8be48fd489cbd4f2d6152bab6"
+    },
+    {
+      "id": "c1",
+      "text": "项目包含自动化测试",
+      "template": "tests",
+      "rule": "R1",
+      "object": "tests/",
+      "state": "insufficient",
+      "explanation": "在指定路径未找到可访问证据。这不代表文件不存在，也不代表功能没有实现。",
+      "alternatives": [
+        {
+          "path": "test/",
+          "files": 8
+        }
+      ],
+      "repo": "chalk/chalk",
+      "commit": "72110019e147683f60e13fa0ff5c14a0c27cd9fe"
+    },
+    {
+      "id": "c2",
+      "text": "项目包含自动化测试",
+      "template": "tests",
+      "rule": "R1",
+      "object": "tests/",
+      "state": "insufficient",
+      "explanation": "在指定路径未找到可访问证据。这不代表文件不存在，也不代表功能没有实现。",
+      "alternatives": [
+        {
+          "path": "backend/tests/",
+          "files": 15
+        },
+        {
+          "path": "frontend/tests/",
+          "files": 12
+        }
+      ],
+      "repo": "fastapi/full-stack-fastapi-template",
+      "commit": "77e550a73bb49dd2967622c5ed11bf7a49603c93"
+    },
+    {
+      "id": "c1",
+      "text": "项目包含自动化测试",
+      "template": "tests",
+      "rule": "R1",
+      "object": "tests/",
+      "state": "insufficient",
+      "explanation": "在指定路径未找到可访问证据。这不代表文件不存在，也不代表功能没有实现。",
+      "alternatives": [
+        {
+          "path": "test/",
+          "files": 153
+        }
+      ],
+      "repo": "sindresorhus/got",
+      "commit": "c196ad006b5c5c21717bafb93a384e68d2f33998"
+    }
+  ]
+}

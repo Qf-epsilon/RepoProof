@@ -5,8 +5,10 @@
   "type": "module",
   "description": "RepoProof - 大学生 GitHub 项目经历证据核验器",
   "scripts": {
-    "test": "node --test tests/core.test.mjs tests/app.test.mjs",
+    "test": "node --test tests/core.test.mjs tests/app.test.mjs tests/suggest.test.mjs tests/share.test.mjs tests/cases.test.mjs",
     "start": "node scripts/dev-server.mjs",
-    "build": "node scripts/build-static.mjs"
+    "build": "node scripts/build-static.mjs",
+    "record:cases": "node scripts/record-snapshot.mjs",
+    "empirical": "node scripts/empirical.mjs"
   }
 }

@@ -8,3 +8,5 @@ Thumbs.db
 .tmp/
 .mimocode/
 research/
+.ui-check/
+.empirical-cache/

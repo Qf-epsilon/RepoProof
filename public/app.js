@@ -2,6 +2,8 @@ import { createGithubGateway } from "/src/adapters/github.js";
 import { createCachedGateway } from "/src/app/session.js";
 import { buildClaimReport, loadRepository, verifyClaims } from "/src/app/usecases.js";
 import { buildEvidenceSheet, evidenceSheetFilename } from "/src/app/export.js";
+import { buildShareLink, decodeShare, encodeShare } from "/src/app/share.js";
+import { listCases, runCase } from "/src/app/cases.js";
 import { runExample } from "/src/app/example.js";
 import {
   BOUNDARY,
@@ -10,6 +12,7 @@ import {
   TEMPLATES,
 } from "/src/core/constants.js";
 import { isSafeGithubUrl } from "/src/core/url.js";
+import { suggestClaimsFromText, suggestFromResume } from "/src/core/suggest.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -35,24 +38,9 @@ const INVENTORY_FOOT = {
   entry: "不代表它就是入口。",
 };
 
-const SUGGESTIONS = [
-  { re: /fastapi/i, template: "framework", object: "fastapi", text: "项目使用 FastAPI 构建后端" },
-  { re: /django/i, template: "framework", object: "django", text: "项目使用 Django 构建后端" },
-  { re: /flask/i, template: "framework", object: "flask", text: "项目使用 Flask 构建后端" },
-  { re: /spring\s*boot/i, template: "framework", object: "spring-boot-starter-web", text: "使用 Spring Boot Web" },
-  { re: /\breact\b/i, template: "framework", object: "react", text: "前端使用 React" },
-  { re: /\bvue\b/i, template: "framework", object: "vue", text: "前端使用 Vue" },
-  { re: /pytest|自动化测试|单元测试/i, template: "tests", object: "tests/", text: "项目包含自动化测试" },
-  { re: /docker/i, template: "docker", object: "Dockerfile", text: "使用 Docker 部署" },
-  { re: /github\s*actions|流水线|\bci\b/i, template: "ci", object: ".github/workflows/", text: "项目配置了 CI 流水线" },
-  { re: /postgres(ql)?/i, template: "storage", object: "postgresql", text: "数据存储使用 PostgreSQL" },
-  { re: /mongo(db)?/i, template: "storage", object: "mongoose", text: "数据存储使用 MongoDB" },
-  { re: /prisma/i, template: "storage", object: "prisma", text: "数据存储使用 Prisma" },
-  { re: /redis/i, template: "storage", object: "redis", text: "数据存储使用 Redis" },
-];
-
 const state = {
   mode: "live",
+  shared: false,
   gateway: null,
   loaded: null,
   claims: [],
@@ -177,8 +165,9 @@ function syncChrome() {
   }
 }
 
-function setExampleMode(enabled, text = "") {
+function setBanner(enabled, text = "", actionLabel = "退出示例") {
   const banner = $("example-banner");
+  $("exit-example").textContent = actionLabel;
   if (enabled) {
     $("example-banner-text").textContent = text;
     banner.hidden = false;
@@ -186,6 +175,10 @@ function setExampleMode(enabled, text = "") {
     banner.hidden = true;
   }
   syncChrome();
+}
+
+function setExampleMode(enabled, text = "") {
+  setBanner(enabled, text, "退出示例");
 }
 
 function startLoading(text) {
@@ -551,6 +544,101 @@ function renderScope() {
   $("verify-status").textContent = `共 ${state.claims.length} 条声明，预计 ${requests} 次请求`;
 }
 
+function setClaimHint(message) {
+  const hint = $("claim-hint");
+  hint.textContent = message || "";
+  hint.hidden = !message;
+}
+
+function renderCaseList() {
+  const host = $("case-list");
+  if (!host) return;
+  host.textContent = "";
+  for (const item of listCases()) {
+    const row = el("div", { className: "case-item" });
+    const main = el("div", { className: "case-main" });
+    main.append(el("p", { className: "case-title", text: item.label }));
+    const meta = el("p", { className: "case-meta" });
+    meta.append(
+      el("span", { className: "mono", text: `${item.repo} · ${shortSha(item.commit)}` })
+    );
+    meta.append(document.createTextNode(` · ${item.snapshotDate} 快照 · ${item.claimCount} 条声明`));
+    main.append(meta);
+    main.append(el("p", { className: "case-note", text: item.note }));
+
+    const action = el("div", { className: "case-action" });
+    const button = el("button", {
+      className: "secondary-button",
+      text: "查看结果",
+      attrs: {
+        type: "button",
+        "aria-label": `查看案例 ${item.label} 的核验结果`,
+      },
+    });
+    button.addEventListener("click", () => handleCase(item.id));
+    action.append(button);
+    row.append(main, action);
+    host.append(row);
+  }
+}
+
+async function handleCase(id) {
+  setHomeError("");
+  startLoading("正在载入案例快照…");
+  showView("repo");
+  setExampleMode(false);
+
+  const result = await runCase(id);
+  if (!result.ok) {
+    stopLoading();
+    showView("home");
+    setHomeError("案例快照加载失败，请刷新页面。");
+    return;
+  }
+
+  state.mode = "case";
+  state.shared = false;
+  state.gateway = result.gateway;
+  state.loaded = {
+    repo: result.repo,
+    inventory: result.inventory,
+    license: result.license,
+    notices: result.notices,
+  };
+  state.claims = result.claims.map((claim, index) => ({
+    id: claim.id,
+    text: claim.text,
+    rule: claim.rule,
+    object: claim.object,
+    manifests: claim.manifests || null,
+    template: claim.template || "case",
+    source: "case",
+    order: index,
+  }));
+  state.nextId = state.claims.length + 1;
+  state.results = result.results;
+  state.report = result.report;
+  state.verifyNotices = [];
+
+  setBanner(
+    true,
+    `案例快照 · ${result.meta.snapshotDate} · 不发起网络请求`,
+    "退出案例"
+  );
+  stopLoading();
+  $("repo-content").hidden = false;
+  renderRepoHead(result);
+  renderOverview($("repo-overview"), result);
+  showNotices($("notices"), result.notices);
+  renderInventory($("inventory"), result.inventory);
+  renderClaims();
+  $("claim-text").value = "";
+  setClaimHint("");
+  renderResults();
+  showView("results");
+  scrollTop();
+}
+
 function suggestClaims() {
   const text = $("claim-text").value || "";
   if (!text.trim()) {
@@ -559,17 +647,7 @@ function suggestClaims() {
   }
   setVerifyError("");
 
-  const suggestions = [];
-  for (const rule of SUGGESTIONS) {
-    if (rule.re.test(text)) suggestions.push(rule);
-  }
-  for (const spdx of SUPPORTED_SPDX) {
-    const pattern = new RegExp(spdx.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
-    if (pattern.test(text)) {
-      suggestions.push({ template: "license", object: spdx, text: `采用 ${spdx} 许可证` });
-      break;
-    }
-  }
+  const suggestions = suggestClaimsFromText(text);
 
   let added = 0;
   for (const item of suggestions) {
@@ -585,7 +663,28 @@ function suggestClaims() {
   }
 }
 
-async function handleLoad(input) {
+async function handleResume() {
+  const text = $("resume-text").value || "";
+  if (!text.trim()) {
+    setHomeError("先粘贴一段简历里的项目段落。");
+    return;
+  }
+
+  const { repoUrl, claims } = suggestFromResume(text);
+  if (!repoUrl) {
+    setHomeError(
+      "这段描述里没有找到 GitHub 仓库地址。可以在下方直接输入地址，或把仓库链接一起粘贴。"
+    );
+    return;
+  }
+
+  setHomeError("");
+  $("repo-url").value = repoUrl;
+  await handleLoad(repoUrl, { draftText: text, suggestions: claims });
+}
+
+async function handleLoad(input, options = {}) {
+  const { draftText = "", suggestions = [] } = options;
   setHomeError("");
   startLoading("正在读取仓库信息…");
   showView("repo");
@@ -600,12 +699,18 @@ async function handleLoad(input) {
   }
 
   state.mode = "live";
+  state.shared = false;
   state.gateway = gateway;
   state.loaded = loaded;
   state.claims = [];
   state.nextId = 1;
   state.results = null;
   state.report = null;
+
+  let added = 0;
+  for (const item of suggestions) {
+    if (addClaim({ ...item, source: "suggested" })) added += 1;
+  }
 
   setExampleMode(false);
   stopLoading();
@@ -615,7 +720,14 @@ async function handleLoad(input) {
   showNotices($("notices"), loaded.notices);
   renderInventory($("inventory"), loaded);
   renderClaims();
-  $("claim-text").value = "";
+  $("claim-text").value = draftText;
+  setClaimHint(
+    added > 0
+      ? `已从描述提取 ${added} 条候选声明（标记“建议”），请逐条确认或删除后再核验。`
+      : draftText
+        ? "这段描述里没有匹配到可核验的字面关键词，可在下方手动添加核验对象。"
+        : ""
+  );
   $("verify-error").hidden = true;
   syncChrome();
 }
@@ -635,6 +747,7 @@ async function handleExample() {
   }
 
   state.mode = "example";
+  state.shared = false;
   state.gateway = null;
   state.loaded = loaded;
   state.claims = loaded.report.claims.map((claim, index) => ({
@@ -663,6 +776,8 @@ async function handleExample() {
   showNotices($("notices"), loaded.notices);
   renderInventory($("inventory"), loaded);
   renderClaims();
+  $("claim-text").value = "";
+  setClaimHint("");
   renderResults();
   showView("results");
   scrollTop();
@@ -708,7 +823,13 @@ function currentSheet() {
   return {
     text: buildEvidenceSheet({
       report: state.report,
-      mode: state.mode,
+      mode: state.shared
+        ? state.mode === "example"
+          ? "shared-example"
+          : state.mode === "case"
+            ? "shared-case"
+            : "shared"
+        : state.mode,
       siteUrl: location.origin,
     }),
     filename: evidenceSheetFilename(state.report.repo),
@@ -776,8 +897,88 @@ function downloadSheet() {
   setSheetStatus("已开始下载证据单。");
 }
 
+async function copyText(text) {
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      /* 回退到 execCommand */
+    }
+  }
+  return fallbackCopy(text);
+}
+
+let shareTimer = null;
+
+async function shareResults() {
+  if (!state.report) return;
+  const encoded = encodeShare(state.report, state.mode);
+  if (!encoded) {
+    setSheetStatus("结果超出分享链接长度上限，可改用复制证据单或下载 .md。");
+    return;
+  }
+
+  const link = buildShareLink(location, encoded);
+  const copied = await copyText(link);
+  setSheetStatus(
+    copied
+      ? "已复制分享链接：打开即为只读证据页。"
+      : "复制失败，请使用浏览器分享功能，或改用复制证据单。"
+  );
+
+  const button = $("share-link");
+  const label = $("share-link-label");
+  clearTimeout(shareTimer);
+  button.dataset.copied = String(copied);
+  label.textContent = copied ? "已复制链接" : "复制分享链接";
+  if (copied) {
+    shareTimer = setTimeout(() => {
+      button.dataset.copied = "false";
+      label.textContent = "复制分享链接";
+    }, 1600);
+  }
+}
+
+function loadSharedFromHash() {
+  const match = /^#r=([A-Za-z0-9_-]+)$/.exec(location.hash || "");
+  if (!match) return false;
+
+  const shared = decodeShare(match[1]);
+  if (!shared) {
+    history.replaceState(null, "", location.pathname);
+    setHomeError("分享链接无效或已损坏，已忽略。");
+    return false;
+  }
+
+  state.mode = shared.mode;
+  state.shared = true;
+  state.gateway = null;
+  state.loaded = {
+    repo: shared.report.repo,
+    notices: [],
+    license: null,
+    inventory: null,
+  };
+  state.claims = [];
+  state.nextId = 1;
+  state.results = shared.report.claims;
+  state.report = shared.report;
+
+  setBanner(
+    true,
+    `只读证据页 · ${shared.mode === "example" ? "示例快照" : shared.mode === "case" ? "案例快照" : "固定提交"} · 不可编辑`,
+    "打开首页"
+  );
+  stopLoading();
+  renderResults();
+  showView("results");
+  scrollTop();
+  return true;
+}
+
 async function handleReverify() {
-  if (state.mode !== "live" || !state.loaded || state.claims.length === 0) return;
+  if (state.mode !== "live" || state.shared || !state.loaded || state.claims.length === 0) return;
   const button = $("reverify-button");
   button.disabled = true;
   button.textContent = "正在重新核验…";
@@ -840,21 +1041,31 @@ function renderResults() {
     `${summary.unable} 条无法完成核验，` +
     `${summary.found} 条发现公开证据。`;
 
-  const live = state.mode === "live";
+  const live = state.mode === "live" && !state.shared;
   $("reverify-button").hidden = !live;
   $("results-example").hidden = !live;
+  $("back-button").hidden = Boolean(state.shared);
+  $("share-note").hidden = Boolean(state.shared);
   setResultsError("");
   $("sheet-status").textContent = "";
   clearTimeout(copyTimer);
   $("copy-sheet").dataset.copied = "false";
   $("copy-sheet-label").textContent = "复制证据单";
+  clearTimeout(shareTimer);
+  $("share-link").dataset.copied = "false";
+  $("share-link-label").textContent = "复制分享链接";
 
   const repo = state.loaded.repo;
   $("results-meta").textContent =
+    `${state.shared ? "只读分享 · " : ""}` +
     `${repo.owner}/${repo.name} · ` +
     `${repo.evidencePinned ? "提交 " + shortSha(repo.commitSha) : "分支 " + repo.defaultBranch} · ` +
     `${formatTime(repo.queriedAt)} · ` +
-    `${state.mode === "example" ? "示例数据（429 为模拟）" : "GitHub 公开 API"}`;
+    `${state.mode === "example"
+      ? "示例数据（429 为模拟）"
+      : state.mode === "case"
+        ? "案例快照（不发起网络请求）"
+        : "GitHub 公开 API"}`;
 
   const notices = [...(state.loaded.notices || []), ...(state.verifyNotices || [])];
   showNotices($("results-notices"), notices);
@@ -863,13 +1074,17 @@ function renderResults() {
   const context = $("results-context");
   const body = $("results-context-body");
   body.textContent = "";
-  const overview = el("dl", { className: "overview" });
-  renderOverview(overview, state.loaded);
-  const inventoryHost = el("div");
-  renderInventory(inventoryHost, state.loaded);
-  body.append(overview, inventoryHost);
-  context.hidden = false;
-  context.open = false;
+  if (state.shared) {
+    context.hidden = true;
+  } else {
+    const overview = el("dl", { className: "overview" });
+    renderOverview(overview, state.loaded);
+    const inventoryHost = el("div");
+    renderInventory(inventoryHost, state.loaded);
+    body.append(overview, inventoryHost);
+    context.hidden = false;
+    context.open = false;
+  }
 
   const list = $("results-list");
   list.textContent = "";
@@ -976,6 +1191,7 @@ function renderResultRow(result, index = 0) {
 
 function resetAll() {
   state.mode = "live";
+  state.shared = false;
   state.gateway = null;
   state.loaded = null;
   state.claims = [];
@@ -1000,6 +1216,13 @@ function resetAll() {
   $("verify-status").textContent = "";
   $("verify-button").disabled = true;
   $("repo-url").value = "";
+  $("resume-text").value = "";
+  setClaimHint("");
+  clearTimeout(shareTimer);
+  $("share-link").dataset.copied = "false";
+  $("share-link-label").textContent = "复制分享链接";
+  $("share-note").hidden = false;
+  if (location.hash) history.replaceState(null, "", location.pathname);
   setResultsError("");
   setSheetStatus("");
   setHomeError("");
@@ -1034,6 +1257,11 @@ function initTemplates() {
 }
 
 function bindEvents() {
+  $("resume-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    handleResume();
+  });
+
   $("repo-form").addEventListener("submit", (event) => {
     event.preventDefault();
     const value = $("repo-url").value.trim();
@@ -1054,6 +1282,7 @@ function bindEvents() {
     scrollTop();
   });
   $("copy-sheet").addEventListener("click", () => copySheet());
+  $("share-link").addEventListener("click", () => shareResults());
   $("download-sheet").addEventListener("click", () => downloadSheet());
   $("reverify-button").addEventListener("click", () => handleReverify());
   $("results-example").addEventListener("click", () => handleExample());
@@ -1100,7 +1329,12 @@ function init() {
   renderLegends();
   initTemplates();
   bindEvents();
-  showView("home");
+  renderCaseList();
+  window.addEventListener("hashchange", () => {
+    if (!/^#r=/.test(location.hash || "")) return;
+    if (!loadSharedFromHash()) showView("home");
+  });
+  if (!loadSharedFromHash()) showView("home");
   syncChrome();
 }
 

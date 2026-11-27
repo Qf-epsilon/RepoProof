@@ -6,6 +6,9 @@ function cleanPath(path) {
 
 export function createSnapshotGateway(snapshot) {
   const { owner, name, commitSha } = snapshot.repo;
+  const rateLimitedPaths = new Set(
+    ((snapshot.simulated && snapshot.simulated.rateLimitedPaths) || []).map(cleanPath)
+  );
   const fileEntries = new Map(
     snapshot.tree.entries
       .filter((entry) => entry.type === "blob")
@@ -25,14 +28,14 @@ export function createSnapshotGateway(snapshot) {
 
     async getContents(_owner, _repo, path) {
       const clean = cleanPath(path);
-      if (clean === ".github/workflows") {
+      if (rateLimitedPaths.has(clean)) {
         return {
           ok: false,
           error: {
             kind: "rate_limited",
             status: 429,
             rateLimit: { remaining: "0" },
-            message: "示例快照模拟 429，用于演示“无法完成核验”。",
+            message: "快照模拟 429，用于演示“无法完成核验”。",
           },
           rateLimit: { remaining: "0" },
         };

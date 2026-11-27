@@ -29,6 +29,15 @@ function nested(items, fallback) {
   return items.map((item) => `  - ${inline(item)}`);
 }
 
+const SOURCE_LABEL = {
+  example: "示例快照（不发起网络请求，429 为模拟）",
+  case: "案例快照（固定提交，不发起网络请求）",
+  shared: "分享的只读结果（打开时不重新请求 GitHub）",
+  "shared-example": "分享的只读示例快照（429 为模拟）",
+  "shared-case": "分享的只读案例快照（固定提交）",
+  live: "GitHub 公开 API",
+};
+
 function timeLabel(iso) {
   if (!iso) return "—";
   const date = new Date(iso);
@@ -79,9 +88,7 @@ export function buildEvidenceSheet({ report, mode = "live", siteUrl = "" }) {
   lines.push(`- 查询时间：${timeLabel(repo.queriedAt)}`);
   lines.push(`- 导出时间：${timeLabel(report.generatedAt)}`);
   lines.push(
-    `- 数据来源：${
-      mode === "example" ? "示例快照（不发起网络请求，429 为模拟）" : "GitHub 公开 API"
-    }`
+    `- 数据来源：${SOURCE_LABEL[mode] || SOURCE_LABEL.live}`
   );
   lines.push("");
   lines.push("## 汇总");

@@ -56,35 +56,55 @@
                 把简历里的项目描述，变成可点开的公开证据
               </h1>
               <p class="lead">
-                输入公开 GitHub 仓库，逐条核对文件、依赖清单和许可证元数据。每条结论都附固定提交的链接，并写明它支持什么、不支持什么。
+                粘贴一段简历里的项目描述，或直接输入公开仓库地址。系统把它拆成可核验声明，确认后逐条核对文件、依赖清单和许可证；每条结论都附固定提交的链接，并写明它支持什么、不支持什么。
               </p>
 
-              <form id="repo-form" class="entry-panel" autocomplete="off">
-                <label class="field-label" for="repo-url">GitHub 仓库地址</label>
-                <div class="input-row">
-                  <input
-                    id="repo-url"
-                    name="repo"
-                    type="text"
-                    inputmode="url"
-                    placeholder="https://github.com/owner/repo"
-                    spellcheck="false"
-                  />
-                  <button id="load-button" type="submit" class="primary-button">
-                    <span>开始核验</span>
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                      <path d="M5 12h14M13 6l6 6-6 6" />
-                    </svg>
-                  </button>
-                </div>
+              <div class="entry-panel">
+                <form id="resume-form" class="entry-step" autocomplete="off">
+                  <label class="field-label" for="resume-text">粘贴简历里的项目段落</label>
+                  <textarea
+                    id="resume-text"
+                    rows="3"
+                    placeholder="例如：使用 FastAPI 构建后端，包含 pytest 测试，采用 MIT 许可证。https://github.com/owner/repo"
+                  ></textarea>
+                  <div class="input-row resume-row">
+                    <button id="resume-button" type="submit" class="primary-button">
+                      <span>提取仓库与声明</span>
+                      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                        <path d="M5 12h14M13 6l6 6-6 6" />
+                      </svg>
+                    </button>
+                    <span class="fineprint">按字面提取，确认后才执行。</span>
+                  </div>
+                </form>
+
+                <div class="entry-split" role="presentation"><span>或，直接输入已知的仓库地址</span></div>
+
+                <form id="repo-form" class="entry-step" autocomplete="off">
+                  <label class="field-label" for="repo-url">GitHub 仓库地址</label>
+                  <div class="input-row">
+                    <input
+                      id="repo-url"
+                      name="repo"
+                      type="text"
+                      inputmode="url"
+                      placeholder="https://github.com/owner/repo"
+                      spellcheck="false"
+                    />
+                    <button id="load-button" type="submit" class="secondary-button">
+                      开始核验
+                    </button>
+                  </div>
+                </form>
+
                 <div class="entry-note">
                   <button id="example-button" type="button" class="text-button">
                     使用示例数据
                   </button>
-                  <span class="fineprint">无需登录，不上传文件。</span>
+                  <span class="fineprint">无需登录，不上传输入。</span>
                 </div>
                 <p id="home-error" class="error-text" role="alert" hidden></p>
-              </form>
+              </div>
 
               <div class="state-block" id="states">
                 <div class="state-block-head">
@@ -94,6 +114,14 @@
                 <ul class="state-legend compact" data-state-legend></ul>
               </div>
             </header>
+
+            <section class="section" id="cases">
+              <div class="section-head">
+                <h2>案例库</h2>
+                <p>真实公开仓库的固定快照，打开即看结果，不发起网络请求。</p>
+              </div>
+              <div id="case-list" class="case-list"></div>
+            </section>
 
             <section class="section" id="how">
               <div class="section-head">
@@ -105,14 +133,14 @@
                   <span class="flow-num" aria-hidden="true">01</span>
                   <div>
                     <strong>读取仓库</strong>
-                    <p>读取默认分支，并把证据固定到当前提交。</p>
+                    <p>粘贴描述时先提取仓库地址；读取默认分支，并把证据固定到当前提交。</p>
                   </div>
                 </li>
                 <li>
                   <span class="flow-num" aria-hidden="true">02</span>
                   <div>
                     <strong>确认对象</strong>
-                    <p>从描述提取或手动添加，确认后才执行。</p>
+                    <p>自动提取的候选声明标记为“建议”，逐条确认或删除后才执行。</p>
                   </div>
                 </li>
                 <li>
@@ -252,6 +280,7 @@
                   <datalist id="spdx-options"></datalist>
                 </div>
 
+                <p id="claim-hint" class="claim-hint fineprint" hidden></p>
                 <p id="claim-empty" class="empty-hint">
                   还没有核验对象。
                 </p>
@@ -298,6 +327,13 @@
                   </svg>
                   <span id="copy-sheet-label">复制证据单</span>
                 </button>
+                <button id="share-link" type="button" class="secondary-button">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <path d="M10.6 13.4a5 5 0 0 0 7.07 0l1.42-1.42a5 5 0 0 0-7.07-7.07l-.7.7" />
+                    <path d="M13.4 10.6a5 5 0 0 0-7.07 0L4.9 12.02a5 5 0 0 0 7.07 7.07l.7-.7" />
+                  </svg>
+                  <span id="share-link-label">复制分享链接</span>
+                </button>
                 <button id="download-sheet" type="button" class="secondary-button">
                   <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                     <path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 20h16" />
@@ -312,6 +348,9 @@
                 </button>
                 <span id="sheet-status" class="fineprint" role="status" aria-live="polite"></span>
               </div>
+              <p id="share-note" class="share-note fineprint">
+                分享链接打开后是只读证据页：不重新请求 GitHub，也不能修改内容。
+              </p>
             </header>
 
             <details class="state-key">
